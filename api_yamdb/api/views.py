@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404
-from .models import User
 from rest_framework import  status
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import (AuthSignUpSerializer, AuthTokenSerializer)
+from django.core.exceptions import ValidationError
+from .models import User, Title, Comment, Review
+from .serializers import (AuthSignUpSerializer, AuthTokenSerializer, TitleSerializer, CommentSerializer, ReviewSerializer)
 from .utils import send_confirmation_code_to_email
 
 
@@ -56,3 +58,47 @@ def get_token(request):
     return Response(
         'Неверный код подтверждения', status=status.HTTP_400_BAD_REQUEST
     )
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    """ permission_classes = (
+        IsAuthorOrReadOnly,
+        permissions.IsAuthenticatedOrReadOnly
+    ) """
+
+    def list(self, request, title_id):
+        title = Title.objects.get(id=title_id)
+        queryset = title.reviews.all()
+        serializer = CommentSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_create(self, serializer):
+        """ queryset = Review.objects.filter(author=self.request.user)
+        if queryset.exists():
+            raise ValidationError('Нельзя добавлять более одного отзыва!') """
+        serializer.save(author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    """ permission_classes = (
+        IsAuthorOrReadOnly,
+        permissions.IsAuthenticatedOrReadOnly
+    ) """
+
+    def list(self, request, review_id):
+        review = Review.objects.get(id=review_id)
+        queryset = review.comments.all()
+        serializer = CommentSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
