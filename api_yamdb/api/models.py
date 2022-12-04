@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+User = get_user_model()
+
 
 class CustomUser(AbstractUser):
 
@@ -24,9 +26,6 @@ class CustomUser(AbstractUser):
         blank=True,
         verbose_name='Код для авторизации'
     )
-
-
-User = get_user_model()
 
 
 class Title(models.Model):

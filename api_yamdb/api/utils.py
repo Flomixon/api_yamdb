@@ -2,9 +2,11 @@ import uuid
 
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from .models import  User
 
 from api_yamdb.settings import EMAIL_ADMIN
+
+from .models import User
+
 
 def send_confirmation_code_to_email(username):
     """Генерирует, отправляет по электронной почте и сохраняет в базу код подтверждения """

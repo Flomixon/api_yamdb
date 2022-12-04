@@ -1,12 +1,13 @@
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from rest_framework import  status
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.exceptions import ValidationError
-from .models import User, Title, Comment, Review
-from .serializers import (AuthSignUpSerializer, AuthTokenSerializer, TitleSerializer, CommentSerializer, ReviewSerializer)
+
+from .models import Comment, Review, Title, User
+from .serializers import (AuthSignUpSerializer, AuthTokenSerializer,
+                          CommentSerializer, ReviewSerializer, TitleSerializer)
 from .utils import send_confirmation_code_to_email
 
 
