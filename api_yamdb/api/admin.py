@@ -1,3 +1,7 @@
+from api.models import Category, Genre, GenreTitle, Title
 from django.contrib import admin
 
-# Register your models here.
+admin.register(Title)
+admin.register(Genre)
+admin.register(Category)
+admin.register(GenreTitle)
