@@ -76,14 +76,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def list(self, request, title_id):
         title = Title.objects.get(id=title_id)
         queryset = title.reviews.all()
-        serializer = CommentSerializer(queryset, many=True)
+        serializer = ReviewSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
-        """ queryset = Review.objects.filter(author=self.request.user)
+        queryset = Review.objects.filter(
+            author=self.request.user,
+            title_id=self.kwargs['title_id']
+        )
         if queryset.exists():
-            raise ValidationError('Нельзя добавлять более одного отзыва!') """
-        serializer.save(author=self.request.user)
+            raise ValidationError('Нельзя добавлять более одного отзыва!')
+        serializer.save(
+            author=self.request.user,
+            title_id=Title.objects.get(id=self.kwargs['title_id'])
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -94,11 +100,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         permissions.IsAuthenticatedOrReadOnly
     ) """
 
-    def list(self, request, review_id):
+    def list(self, request, title_id, review_id):
         review = Review.objects.get(id=review_id)
         queryset = review.comments.all()
         serializer = CommentSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        serializer.save(
+            author=self.request.user,
+            review_id=Review.objects.get(id=self.kwargs['review_id'])
+        )
