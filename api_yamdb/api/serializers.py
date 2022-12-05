@@ -2,20 +2,20 @@ import datetime
 
 from rest_framework import serializers
 
-from .models import Comment, Review, Title, User, Category, Genre
+from .models import Category, Comment, Genre, Review, Title, User
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug',)  # в документации поля "name", "slug"
+        fields = ('name', 'slug',)
         model = Genre
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug',)  # в документации поля "name", "slug"
+        fields = ('name', 'slug',)
         model = Category
 
 

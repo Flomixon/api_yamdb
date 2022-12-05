@@ -21,9 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api.apps.ApiConfig',
     'rest_framework',
     'rest_framework_simplejwt',
-    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -108,18 +108,14 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 # DRF config 
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE': 10,
 }
 
 AUTH_USER_MODEL = 'api.CustomUser'
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
-}
-
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
