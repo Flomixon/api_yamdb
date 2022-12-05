@@ -1,9 +1,9 @@
 import datetime
 
 from rest_framework import serializers
-from rest_framework import serializers
 
 from .models import Comment, Review, Title, User, Category, Genre
+
 
 class GenreSerializer(serializers.ModelSerializer):
 
@@ -71,7 +71,7 @@ class AuthTokenSerializer(serializers.Serializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
-    ) 
+    )
 
     class Meta:
         fields = '__all__'
@@ -79,10 +79,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
 
 
-class CommentSerializer(serializers.ModelSerializer): 
+class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
-    ) 
+    )
 
     class Meta:
         fields = '__all__'

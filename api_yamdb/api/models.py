@@ -4,9 +4,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
-User = get_user_model()
-
-
 class Category(models.Model):
     """Модель категорий."""
     name = models.CharField(max_length=256)
@@ -14,11 +11,11 @@ class Category(models.Model):
 
     def __str__(self) -> str:
         return self.name
-    
+
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ('name',) 
+        ordering = ('name',)
 
 
 class Genre(models.Model):
@@ -28,7 +25,7 @@ class Genre(models.Model):
 
     def __str__(self) -> str:
         return self.name
-    
+
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
@@ -98,6 +95,9 @@ class CustomUser(AbstractUser):
         blank=True,
         verbose_name='Код для авторизации'
     )
+
+
+User = get_user_model()
 
 
 class Review(models.Model):

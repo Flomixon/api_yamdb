@@ -1,18 +1,24 @@
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Comment, Review, Title, User
-from .serializers import (AuthSignUpSerializer, AuthTokenSerializer,
-                          CommentSerializer, ReviewSerializer, TitleSerializer)
+from .models import Comment, Review, Title, User, Category, Genre
+from .serializers import (
+    AuthSignUpSerializer,
+    AuthTokenSerializer,
+    CommentSerializer,
+    ReviewSerializer,
+    TitleSerializer,
+    CategorySerializer,
+    GenreSerializer,
+    ReadTitleSerializer
+)
 from .utils import send_confirmation_code_to_email
 from api.mixins import CustomViewSet
-from api.models import Category, Genre, Title
-from api.serializers import (CategorySerializer, GenreSerializer,
-                             ReadTitleSerializer, TitleSerializer)
 
 
 @api_view(['POST'])
@@ -102,7 +108,7 @@ class CategoryViewSet(CustomViewSet):
             name=serializer.request.data['name'],
             slug=serializer.request.data['slug']
         )
-    
+
     def perform_destroy(self, instance):
         instance = get_object_or_404(
             Category,
