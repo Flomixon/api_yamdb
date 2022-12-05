@@ -105,6 +105,13 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
+# DRF config 
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE': 10,
+}
+
 AUTH_USER_MODEL = 'api.CustomUser'
 
 REST_FRAMEWORK = {
