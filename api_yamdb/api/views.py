@@ -15,7 +15,8 @@ from .serializers import (
     TitleSerializer,
     CategorySerializer,
     GenreSerializer,
-    ReadTitleSerializer
+    ReadTitleSerializer,
+    UserSerializer
 )
 from .utils import send_confirmation_code_to_email
 
@@ -154,3 +155,45 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             review_id=Review.objects.get(id=self.kwargs['review_id'])
         )
+
+
+@api_view(['GET', 'PATCH'])
+def user_me(request):
+    user = User.objects.get(username=request.user)
+    if request.method == 'PATCH':
+        role = user.role
+        request.data['role'] = role
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    http_method_names = ['get', 'post']
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+def username_update(request, slug):
+    if request.user.role == 'admin':
+        user = get_object_or_404(User, username=slug)
+        print('OK')
+        if request.method == 'DELETE':
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'GET':
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_403_FORBIDDEN)

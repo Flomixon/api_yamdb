@@ -7,10 +7,13 @@ from .views import (
     TitleViewSet,
     CategoryViewSet,
     GenreViewSet,
+    UserViewSet,
     get_token,
     signup_new_user,
     slug_cat_destroy,
-    slug_gen_destroy
+    slug_gen_destroy,
+    user_me,
+    username_update
 )
 
 
@@ -25,11 +28,14 @@ router_v1.register(
     r'titles/(?P<title_id>[1-9]\d*)/reviews/(?P<review_id>[1-9]\d*)/comments',
     CommentViewSet
 )
+router_v1.register('users', UserViewSet)
 
 urlpatterns = [
     path('v1/auth/signup/', signup_new_user, name='auth_signup'),
     path('v1/auth/token/', get_token, name='auth_token'),
     path('v1/categories/<slug:slug>/', slug_cat_destroy),
     path('v1/genres/<slug:slug>/', slug_gen_destroy),
+    path('v1/users/<slug:slug>/', username_update),
+    path('v1/users/me/', user_me),
     path('v1/', include(router_v1.urls))
 ]
