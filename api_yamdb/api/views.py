@@ -18,7 +18,6 @@ from .serializers import (
     ReadTitleSerializer
 )
 from .utils import send_confirmation_code_to_email
-from api.mixins import CustomViewSet
 
 
 @api_view(['POST'])
@@ -81,44 +80,32 @@ class TitleViewSet(viewsets.ModelViewSet):
         return ReadTitleSerializer
 
 
-class GenreViewSet(CustomViewSet):
+class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(
-            name=serializer.request.data['name'],
-            # в serializer отсутствует атрибут request
-            slug=serializer.request.data['slug']
-            # в serializer отсутствует атрибут request
-        )
 
-    def perform_destroy(self, instance):
-        instance = get_object_or_404(
-            Genre,
-            slug=self.kwargs.get('slug')
-        )
-        instance.delete()
+@api_view(['DELETE'])
+def slug_gen_destroy(request, slug):
+    if request.user.role == 'admin':
+        cat = get_object_or_404(Category, slug=slug)
+        cat.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_403_FORBIDDEN)
 
 
-class CategoryViewSet(CustomViewSet):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-    def perform_create(self, serializer):
-        serializer.save(
-            name=serializer.request.data['name'],
-            # в serializer отсутствует атрибут request
-            slug=serializer.request.data['slug']
-            # в serializer отсутствует атрибут request
-        )
 
-    def perform_destroy(self, instance):
-        instance = get_object_or_404(
-            Category,
-            slug=self.kwargs.get('slug')
-        )
-        instance.delete()
+@api_view(['DELETE'])
+def slug_cat_destroy(request, slug):
+    if request.user.role == 'admin':
+        cat = get_object_or_404(Category, slug=slug)
+        cat.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
