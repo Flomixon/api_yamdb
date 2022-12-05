@@ -35,12 +35,13 @@ class Genre(models.Model):
 class Title(models.Model):
     """Модель произведений."""
     name = models.CharField(max_length=256)
-    year = models.IntegerField()
+    year = models.IntegerField()  # думаю лучше DateTimeField
     description = models.TextField(null=True)
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle'
     )
+    # on_delete
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -86,6 +87,7 @@ class CustomUser(AbstractUser):
         max_length=16,
         verbose_name='Роль'
     )
+    # default='user'
     bio = models.TextField(
         blank=True,
         verbose_name='Описание'

@@ -88,7 +88,9 @@ class GenreViewSet(CustomViewSet):
     def perform_create(self, serializer):
         serializer.save(
             name=serializer.request.data['name'],
+            # в serializer отсутствует атрибут request
             slug=serializer.request.data['slug']
+            # в serializer отсутствует атрибут request
         )
 
     def perform_destroy(self, instance):
@@ -106,7 +108,9 @@ class CategoryViewSet(CustomViewSet):
     def perform_create(self, serializer):
         serializer.save(
             name=serializer.request.data['name'],
+            # в serializer отсутствует атрибут request
             slug=serializer.request.data['slug']
+            # в serializer отсутствует атрибут request
         )
 
     def perform_destroy(self, instance):
