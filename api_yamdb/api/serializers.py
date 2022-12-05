@@ -8,14 +8,14 @@ from .models import Comment, Review, Title, User, Category, Genre
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('id', 'name',)  # в документации поля "name", "slug"
+        fields = ('name', 'slug',)  # в документации поля "name", "slug"
         model = Genre
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('id', 'name',)  # в документации поля "name", "slug"
+        fields = ('name', 'slug',)  # в документации поля "name", "slug"
         model = Category
 
 
@@ -45,9 +45,6 @@ class TitleSerializer(serializers.ModelSerializer):
     def validate_year(self, value):
         current_year = datetime.datetime.now().year
         if value > current_year:
-            # если в модели оставить IntegerField.
-            # То будет ожидаться целое число
-            # и в дальнейшем сравнение int с datetime
             raise serializers.ValidationError(
                 'Год выпуска не может быть больше текущего',
                 f'Сейчас {current_year} год'

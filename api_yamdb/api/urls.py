@@ -8,7 +8,9 @@ from .views import (
     CategoryViewSet,
     GenreViewSet,
     get_token,
-    signup_new_user
+    signup_new_user,
+    slug_cat_destroy,
+    slug_gen_destroy
 )
 
 
@@ -27,5 +29,7 @@ router_v1.register(
 urlpatterns = [
     path('v1/auth/signup/', signup_new_user, name='auth_signup'),
     path('v1/auth/token/', get_token, name='auth_token'),
+    path('v1/categories/<slug:slug>/', slug_cat_destroy),
+    path('v1/genres/<slug:slug>/', slug_gen_destroy),
     path('v1/', include(router_v1.urls))
 ]
