@@ -9,14 +9,14 @@ from .models import Comment, Review, Title, User, Category, Genre
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug',)  # в документации поля "name", "slug"
+        fields = ('name', 'slug',)
         model = Genre
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug',)  # в документации поля "name", "slug"
+        fields = ('name', 'slug',)
         model = Category
 
 

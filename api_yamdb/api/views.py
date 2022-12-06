@@ -182,7 +182,6 @@ class UserViewSet(viewsets.ModelViewSet):
 def username_update(request, slug):
     if request.user.role == 'admin':
         user = get_object_or_404(User, username=slug)
-        print('OK')
         if request.method == 'DELETE':
             user.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
