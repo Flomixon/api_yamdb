@@ -1,21 +1,22 @@
 import datetime
 
 from rest_framework import serializers
+from django.db.models import Avg
 
-from .models import Category, Comment, Genre, Review, Title, User
+from .models import Comment, Review, Title, User, Category, Genre
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug',)
+        fields = ('name', 'slug',)  # в документации поля "name", "slug"
         model = Genre
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug',)
+        fields = ('name', 'slug',)  # в документации поля "name", "slug"
         model = Category
 
 
@@ -25,9 +26,18 @@ class ReadTitleSerializer(serializers.ModelSerializer):
         many=True
     )
     category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField('count_rating')
+
+    def count_rating(self, value):
+        if value.score.count() > 0:
+            rating = value.score.aggregate(rt=Avg('score'))
+            return rating['rt']
+        return '0'
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
         model = Title
 
 

@@ -1,15 +1,23 @@
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Category, Comment, Genre, Review, Title, User
-from .serializers import (AuthSignUpSerializer, AuthTokenSerializer,
-                          CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReadTitleSerializer,
-                          ReviewSerializer, TitleSerializer, UserSerializer)
+from .models import Comment, Review, Title, User, Category, Genre
+from .serializers import (
+    AuthSignUpSerializer,
+    AuthTokenSerializer,
+    CommentSerializer,
+    ReviewSerializer,
+    TitleSerializer,
+    CategorySerializer,
+    GenreSerializer,
+    ReadTitleSerializer,
+    UserSerializer
+)
 from .utils import send_confirmation_code_to_email
 
 
@@ -151,7 +159,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET', 'PATCH'])
 def user_me(request):
-    user = User.objects.get(username=request.user)
+    user = request.user
     if request.method == 'PATCH':
         role = user.role
         request.data['role'] = role
