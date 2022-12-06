@@ -1,21 +1,22 @@
 import datetime
 
 from rest_framework import serializers
-from rest_framework import serializers
+from django.db.models import Avg
 
 from .models import Comment, Review, Title, User, Category, Genre
+
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('id', 'name',)
+        fields = ('name', 'slug',)
         model = Genre
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('id', 'name',)
+        fields = ('name', 'slug',)
         model = Category
 
 
@@ -25,9 +26,18 @@ class ReadTitleSerializer(serializers.ModelSerializer):
         many=True
     )
     category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField('count_rating')
+
+    def count_rating(self, value):
+        if value.score.count() > 0:
+            rating = value.score.aggregate(rt=Avg('score'))
+            return rating['rt']
+        return '0'
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category',)
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
         model = Title
 
 
@@ -71,7 +81,7 @@ class AuthTokenSerializer(serializers.Serializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
-    ) 
+    )
 
     class Meta:
         fields = '__all__'
@@ -79,12 +89,21 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
 
 
-class CommentSerializer(serializers.ModelSerializer): 
+class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
-    ) 
+    )
 
     class Meta:
         fields = '__all__'
         read_only_fields = ('author', 'review_id')
         model = Comment
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = (
+            "username", "email", "first_name", "last_name", "bio", "role"
+        )
+        model = User

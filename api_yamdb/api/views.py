@@ -5,14 +5,26 @@ from api.serializers import (CategorySerializer, GenreSerializer,
                              ReadTitleSerializer, TitleSerializer)
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+
 from rest_framework import filters, status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Comment, Review, Title, User
-from .serializers import (AuthSignUpSerializer, AuthTokenSerializer,
-                          CommentSerializer, ReviewSerializer, TitleSerializer)
+from .models import Comment, Review, Title, User, Category, Genre
+from .serializers import (
+    AuthSignUpSerializer,
+    AuthTokenSerializer,
+    CommentSerializer,
+    ReviewSerializer,
+    TitleSerializer,
+    CategorySerializer,
+    GenreSerializer,
+    ReadTitleSerializer,
+    UserSerializer
+)
+from .permission import (AdminOrReadOnly, AdminOrStaffPermission,
+                          AuthorOrModerPermission, UserForSelfPermission)
 from .utils import send_confirmation_code_to_email
 
 
@@ -70,6 +82,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filterset_class = TitleFilter
+    permission_classes = (AdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.request.method in ('PATCH', 'POST',):
@@ -77,53 +90,46 @@ class TitleViewSet(viewsets.ModelViewSet):
         return ReadTitleSerializer
 
 
-class GenreViewSet(CustomViewSet):
+class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-
-    def perform_create(self, serializer):
-        serializer.save(
-            name=serializer.request.data['name'],
-            slug=serializer.request.data['slug']
-        )
-
-    def perform_destroy(self, instance):
-        instance = get_object_or_404(
-            Genre,
-            slug=self.kwargs.get('slug')
-        )
-        instance.delete()
+    permission_classes = (AdminOrReadOnly,)
 
 
-class CategoryViewSet(CustomViewSet):
+@api_view(['DELETE'])
+def slug_gen_destroy(request, slug):
+    if request.user.role == 'admin':
+        cat = get_object_or_404(Category, slug=slug)
+        cat.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_403_FORBIDDEN)
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    permission_classes = (AdminOrReadOnly,)
 
-    def perform_create(self, serializer):
-        serializer.save(
-            name=serializer.request.data['name'],
-            slug=serializer.request.data['slug']
-        )
-    
-    def perform_destroy(self, instance):
-        instance = get_object_or_404(
-            Category,
-            slug=self.kwargs.get('slug')
-        )
-        instance.delete()
+
+@api_view(['DELETE'])
+def slug_cat_destroy(request, slug):
+    if request.user.role == 'admin':
+        cat = get_object_or_404(Category, slug=slug)
+        cat.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    return Response(status=status.HTTP_403_FORBIDDEN)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    """ permission_classes = (
-        IsAuthorOrReadOnly,
-        permissions.IsAuthenticatedOrReadOnly
-    ) """
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        AuthorOrModerPermission]
 
     def list(self, request, title_id):
         title = Title.objects.get(id=title_id)
@@ -147,11 +153,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    """ permission_classes = (
-        IsAuthorOrReadOnly,
-        permissions.IsAuthenticatedOrReadOnly
-    ) """
-
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        AuthorOrModerPermission]
     def list(self, request, title_id, review_id):
         review = Review.objects.get(id=review_id)
         queryset = review.comments.all()
@@ -163,3 +167,46 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             review_id=Review.objects.get(id=self.kwargs['review_id'])
         )
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([UserForSelfPermission,])
+def user_me(request):
+    user = request.user
+    if request.method == 'PATCH':
+        role = user.role
+        request.data['role'] = role
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    http_method_names = ['get', 'post']
+    permission_classes = (AdminOrStaffPermission,)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+def username_update(request, slug):
+    if request.user.role == 'admin':
+        user = get_object_or_404(User, username=slug)
+        if request.method == 'DELETE':
+            user.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'PATCH':
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'GET':
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_403_FORBIDDEN)

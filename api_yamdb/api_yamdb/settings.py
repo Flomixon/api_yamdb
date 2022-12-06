@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api.apps.ApiConfig',
     'rest_framework',
     'django_filters',
     'rest_framework_simplejwt',
@@ -108,6 +109,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 # DRF config 
 
+
 AUTH_USER_MODEL = 'api.CustomUser'
 
 REST_FRAMEWORK = {
@@ -117,6 +119,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE': 10,
 }
+
+
+AUTH_USER_MODEL = 'api.CustomUser'
 
 
 SIMPLE_JWT = {

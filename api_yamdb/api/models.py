@@ -4,9 +4,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
-User = get_user_model()
-
-
 class Category(models.Model):
     """Модель категорий."""
     name = models.CharField(max_length=256)
@@ -14,11 +11,11 @@ class Category(models.Model):
 
     def __str__(self) -> str:
         return self.name
-    
+
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ('name',) 
+        ordering = ('name',)
 
 
 class Genre(models.Model):
@@ -28,7 +25,7 @@ class Genre(models.Model):
 
     def __str__(self) -> str:
         return self.name
-    
+
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
@@ -86,6 +83,16 @@ class GenreTitle(models.Model):
 
 class CustomUser(AbstractUser):
 
+    ROLE_USER = 'user'
+    ROLE_MODERATOR = 'moderator'
+    ROLE_ADMIN = 'admin'
+
+    USER_ROLE_CHOICES = (
+        (ROLE_USER, 'Пользователь'),
+        (ROLE_MODERATOR, 'Модератор'),
+        (ROLE_ADMIN, 'Администратор'),
+    )
+
     email = models.EmailField(
         max_length=254,
         unique=True,
@@ -93,11 +100,23 @@ class CustomUser(AbstractUser):
     )
     role = models.CharField(
         max_length=16,
+        choices=USER_ROLE_CHOICES,
+        default=ROLE_USER,
         verbose_name='Роль'
     )
     bio = models.TextField(
         blank=True,
         verbose_name='Описание'
+    )
+    first_name = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name='Имя'
+    )
+    last_name = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name='Фамилия'
     )
     confirmation_code = models.CharField(
         max_length=50,
@@ -106,9 +125,42 @@ class CustomUser(AbstractUser):
     )
 
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_username_email'
+            )
+        ]
+
+    @property
+    def is_user(self):
+        if self.role == self.ROLE_USER:
+            return True
+        else:
+            return False
+
+    @property
+    def is_moderator(self):
+        if self.role == self.ROLE_MODERATOR:
+            return True
+        else:
+            return False
+
+    @property
+    def is_admin(self):
+        if self.role == self.ROLE_ADMIN:
+            return True
+        else:
+            return False
+
+
+User = get_user_model()
+
+
 class Review(models.Model):
     title_id = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='reviews')
+        Title, on_delete=models.CASCADE, related_name='score')
     text = models.TextField()
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews')
