@@ -1,30 +1,20 @@
 from api.filters import TitleFilter
 from api.mixins import CustomViewSet
 from api.models import Category, Genre, Title
-from api.serializers import (CategorySerializer, GenreSerializer,
-                             ReadTitleSerializer, TitleSerializer)
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Comment, Review, Title, User, Category, Genre
-from .serializers import (
-    AuthSignUpSerializer,
-    AuthTokenSerializer,
-    CommentSerializer,
-    ReviewSerializer,
-    TitleSerializer,
-    CategorySerializer,
-    GenreSerializer,
-    ReadTitleSerializer,
-    UserSerializer
-)
+from .models import Category, Comment, Genre, Review, Title, User
 from .permission import (AdminOrReadOnly, AdminOrStaffPermission,
-                          AuthorOrModerPermission, UserForSelfPermission)
+                         AuthorOrModerPermission, UserForSelfPermission)
+from .serializers import (AuthSignUpSerializer, AuthTokenSerializer,
+                          CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReadTitleSerializer,
+                          ReviewSerializer, TitleSerializer, UserSerializer)
 from .utils import send_confirmation_code_to_email
 
 
