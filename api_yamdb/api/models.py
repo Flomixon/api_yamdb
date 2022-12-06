@@ -57,6 +57,12 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произвдения'
         ordering = ('name',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'genre'],
+                name='unique_title'
+            )
+        ]
 
 
 class GenreTitle(models.Model):

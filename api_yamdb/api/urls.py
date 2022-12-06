@@ -8,7 +8,7 @@ from api.views import CategoryViewSet, GenreViewSet, TitleViewSet
 
 app_name = 'api'
 
-router = DefaultRouter()
+router_v1 = DefaultRouter()
 router_v1.register('titles', TitleViewSet)
 router_v1.register('categories', CategoryViewSet)
 router_v1.register('genres', GenreViewSet)

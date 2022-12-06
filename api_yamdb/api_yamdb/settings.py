@@ -11,19 +11,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-AUTH_USER_MODEL = 'api.CustomUser'
 
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'api',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api.apps.ApiConfig',
     'django_filters',
     'rest_framework_simplejwt',
 ]
@@ -108,6 +107,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 # DRF config 
+
+AUTH_USER_MODEL = 'api.CustomUser'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

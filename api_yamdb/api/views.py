@@ -1,6 +1,11 @@
+from api.filters import TitleFilter
+from api.mixins import CustomViewSet
+from api.models import Category, Genre, Title
+from api.serializers import (CategorySerializer, GenreSerializer,
+                             ReadTitleSerializer, TitleSerializer)
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,10 +14,6 @@ from .models import Comment, Review, Title, User
 from .serializers import (AuthSignUpSerializer, AuthTokenSerializer,
                           CommentSerializer, ReviewSerializer, TitleSerializer)
 from .utils import send_confirmation_code_to_email
-from api.mixins import CustomViewSet
-from api.models import Category, Genre, Title
-from api.serializers import (CategorySerializer, GenreSerializer,
-                             ReadTitleSerializer, TitleSerializer)
 
 
 @api_view(['POST'])
@@ -68,6 +69,7 @@ def get_token(request):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method in ('PATCH', 'POST',):
@@ -78,6 +80,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 class GenreViewSet(CustomViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
     def perform_create(self, serializer):
         serializer.save(
@@ -96,6 +100,8 @@ class GenreViewSet(CustomViewSet):
 class CategoryViewSet(CustomViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
     def perform_create(self, serializer):
         serializer.save(
