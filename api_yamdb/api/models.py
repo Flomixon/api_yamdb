@@ -62,7 +62,7 @@ class GenreTitle(models.Model):
         Genre,
         on_delete=models.CASCADE,
     )
-    title = models.ForeignKey(
+    titlegit  = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
     )
