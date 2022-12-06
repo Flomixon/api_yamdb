@@ -77,6 +77,16 @@ class GenreTitle(models.Model):
 
 class CustomUser(AbstractUser):
 
+    ROLE_USER = 'user'
+    ROLE_MODERATOR = 'moderator'
+    ROLE_ADMIN = 'admin'
+
+    USER_ROLE_CHOICES = (
+        (ROLE_USER, 'Пользователь'),
+        (ROLE_MODERATOR, 'Модератор'),
+        (ROLE_ADMIN, 'Администратор'),
+    )
+
     email = models.EmailField(
         max_length=254,
         unique=True,
@@ -84,18 +94,59 @@ class CustomUser(AbstractUser):
     )
     role = models.CharField(
         max_length=16,
-        default='user',
+        choices=USER_ROLE_CHOICES,
+        default=ROLE_USER,
         verbose_name='Роль'
     )
     bio = models.TextField(
         blank=True,
         verbose_name='Описание'
     )
+    first_name = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name='Имя'
+    )
+    last_name = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name='Фамилия'
+    )
     confirmation_code = models.CharField(
         max_length=50,
         blank=True,
         verbose_name='Код для авторизации'
     )
+
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_username_email'
+            )
+        ]
+
+    @property
+    def is_user(self):
+        if self.role == self.ROLE_USER:
+            return True
+        else:
+            return False
+
+    @property
+    def is_moderator(self):
+        if self.role == self.ROLE_MODERATOR:
+            return True
+        else:
+            return False
+
+    @property
+    def is_admin(self):
+        if self.role == self.ROLE_ADMIN:
+            return True
+        else:
+            return False
 
 
 User = get_user_model()
