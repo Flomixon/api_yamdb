@@ -1,8 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
-from rest_framework import status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework import status, viewsets, permissions
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -18,6 +18,8 @@ from .serializers import (
     ReadTitleSerializer,
     UserSerializer
 )
+from .permission import (AdminOrReadOnly, AdminOrStaffPermission,
+                          AuthorOrModerPermission, UserForSelfPermission)
 from .utils import send_confirmation_code_to_email
 
 
@@ -74,6 +76,7 @@ def get_token(request):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (AdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.request.method in ('PATCH', 'POST',):
@@ -84,6 +87,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (AdminOrReadOnly,)
 
 
 @api_view(['DELETE'])
@@ -98,7 +102,7 @@ def slug_gen_destroy(request, slug):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-
+    permission_classes = (AdminOrReadOnly,)
 
 @api_view(['DELETE'])
 def slug_cat_destroy(request, slug):
@@ -112,10 +116,9 @@ def slug_cat_destroy(request, slug):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    """ permission_classes = (
-        IsAuthorOrReadOnly,
-        permissions.IsAuthenticatedOrReadOnly
-    ) """
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        AuthorOrModerPermission]
 
     def list(self, request, title_id):
         title = Title.objects.get(id=title_id)
@@ -139,11 +142,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    """ permission_classes = (
-        IsAuthorOrReadOnly,
-        permissions.IsAuthenticatedOrReadOnly
-    ) """
-
+    permission_classes = [
+        permissions.IsAuthenticatedOrReadOnly,
+        AuthorOrModerPermission]
     def list(self, request, title_id, review_id):
         review = Review.objects.get(id=review_id)
         queryset = review.comments.all()
@@ -158,6 +159,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['GET', 'PATCH'])
+@permission_classes([UserForSelfPermission,])
 def user_me(request):
     user = request.user
     if request.method == 'PATCH':
@@ -176,6 +178,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     http_method_names = ['get', 'post']
+    permission_classes = (AdminOrStaffPermission,)
 
 
 @api_view(['GET', 'PATCH', 'DELETE'])
