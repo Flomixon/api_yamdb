@@ -1,7 +1,12 @@
+from api.filters import TitleFilter
+from api.mixins import CustomViewSet
+from api.models import Category, Genre, Title
+from api.serializers import (CategorySerializer, GenreSerializer,
+                             ReadTitleSerializer, TitleSerializer)
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
-from rest_framework import status, viewsets, permissions
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -76,6 +81,7 @@ def get_token(request):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    filterset_class = TitleFilter
     permission_classes = (AdminOrReadOnly,)
 
     def get_serializer_class(self):
@@ -87,6 +93,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
     permission_classes = (AdminOrReadOnly,)
 
 
@@ -102,7 +110,10 @@ def slug_gen_destroy(request, slug):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
     permission_classes = (AdminOrReadOnly,)
+
 
 @api_view(['DELETE'])
 def slug_cat_destroy(request, slug):
