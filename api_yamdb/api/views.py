@@ -90,11 +90,11 @@ class TitleViewSet(viewsets.ModelViewSet):
         return ReadTitleSerializer
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(CustomViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
+    search_fields = ('slug',)
     permission_classes = (AdminOrReadOnly,)
 
 
@@ -107,11 +107,11 @@ def slug_gen_destroy(request, slug):
     return Response(status=status.HTTP_403_FORBIDDEN)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(CustomViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
+    search_fields = ('slug',)
     permission_classes = (AdminOrReadOnly,)
 
 
