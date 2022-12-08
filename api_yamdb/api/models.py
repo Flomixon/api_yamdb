@@ -54,12 +54,12 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произвдения'
         ordering = ('name',)
-        constraints = [
+        """ constraints = [
             models.UniqueConstraint(
                 fields=['name', 'genre'],
                 name='unique_title'
             )
-        ]
+        ] """
 
 
 class GenreTitle(models.Model):
@@ -77,6 +77,12 @@ class GenreTitle(models.Model):
         return f'Жанр {self.title}: {self.genre}'
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['genre', 'titlegit'],
+                name='unique_genr_title'
+            )
+        ]
         verbose_name = 'Жанр и произведение'
         verbose_name_plural = 'Жанры и произведения'
 
