@@ -1,5 +1,5 @@
-from api.mixins import CustomViewSet
 from django.shortcuts import get_object_or_404
+
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
@@ -7,14 +7,25 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api.mixins import CustomViewSet
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from .permission import (AdminOrReadOnly, AdminOrStaffPermission,
-                         AuthorOrModerPermission,)
-from .serializers import (AuthSignUpSerializer, AuthTokenSerializer,
-                          CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReadTitleSerializer,
-                          ReviewSerializer, TitleSerializer, UserSerializer)
-from .utils import send_confirmation_code_to_email
+from api.permission import (
+    AdminOrReadOnly,
+    AdminOrStaffPermission,
+    AuthorOrModerPermission,
+)
+from api.serializers import (
+    AuthSignUpSerializer,
+    AuthTokenSerializer,
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ReadTitleSerializer,
+    ReviewSerializer,
+    TitleSerializer,
+    UserSerializer
+)
+from api.utils import send_confirmation_code_to_email
 
 
 @api_view(['POST'])
@@ -106,6 +117,7 @@ class GenreViewSet(CustomViewSet):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def slug_gen_destroy(request, slug):
+    "Удаление жанров"
     if request.user.role == 'admin':
         cat = get_object_or_404(Genre, slug=slug)
         cat.delete()
@@ -124,6 +136,7 @@ class CategoryViewSet(CustomViewSet):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def slug_cat_destroy(request, slug):
+    "Удаление категорий"
     if request.user.role == 'admin':
         cat = get_object_or_404(Category, slug=slug)
         cat.delete()
@@ -182,6 +195,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def user_me(request):
+    "Редактирование личного профиля"
     user = request.user
     if request.method == 'PATCH':
         serializer = UserSerializer(user, data=request.data, partial=True)
@@ -206,6 +220,7 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['GET', 'PATCH', 'DELETE', 'PUT'])
 @permission_classes([IsAuthenticated])
 def username_update(request, slug):
+    "Редактирование и создание пользователя администратором"
     req_user = request.user
     if req_user.is_admin or req_user.is_superuser:
         user = get_object_or_404(User, username=slug)
