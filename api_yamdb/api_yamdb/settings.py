@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework_simplejwt',
     'api.apps.ApiConfig',
+    'reviews.apps.ReviewsConfig',
 ]
 
 
@@ -107,21 +108,18 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
-# DRF config 
+# DRF config
 
 
-AUTH_USER_MODEL = 'api.CustomUser'
+AUTH_USER_MODEL = 'reviews.CustomUser'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
 }
-
-
-AUTH_USER_MODEL = 'api.CustomUser'
 
 
 SIMPLE_JWT = {
@@ -132,4 +130,4 @@ SIMPLE_JWT = {
 
 EMAIL_ADMIN = 'Admin@admin.com'
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails') 
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')

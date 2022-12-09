@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 
 from api_yamdb.settings import EMAIL_ADMIN
 
-from .models import User
+from reviews.models import User
 
 
 def send_confirmation_code_to_email(username):

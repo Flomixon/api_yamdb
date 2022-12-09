@@ -1,16 +1,15 @@
 from api.filters import TitleFilter
 from api.mixins import CustomViewSet
-from api.models import Category, Genre, Title
-from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
 from .permission import (AdminOrReadOnly, AdminOrStaffPermission,
-                         AuthorOrModerPermission, UserForSelfPermission)
+                         AuthorOrModerPermission,)
 from .serializers import (AuthSignUpSerializer, AuthTokenSerializer,
                           CategorySerializer, CommentSerializer,
                           GenreSerializer, ReadTitleSerializer,
@@ -84,14 +83,15 @@ class GenreViewSet(CustomViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('slug',)
+    search_fields = ('name',)
     permission_classes = (AdminOrReadOnly,)
 
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def slug_gen_destroy(request, slug):
     if request.user.role == 'admin':
-        cat = get_object_or_404(Category, slug=slug)
+        cat = get_object_or_404(Genre, slug=slug)
         cat.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     return Response(status=status.HTTP_403_FORBIDDEN)
@@ -101,11 +101,12 @@ class CategoryViewSet(CustomViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('slug',)
+    search_fields = ('name',)
     permission_classes = (AdminOrReadOnly,)
 
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def slug_cat_destroy(request, slug):
     if request.user.role == 'admin':
         cat = get_object_or_404(Category, slug=slug)
@@ -123,21 +124,24 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def list(self, request, title_id):
         title = Title.objects.get(id=title_id)
-        queryset = title.reviews.all()
+        queryset = title.score.all()
         serializer = ReviewSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def perform_create(self, serializer):
+    def create(self, request, title_id):
         queryset = Review.objects.filter(
             author=self.request.user,
-            title_id=self.kwargs['title_id']
+            title_id=title_id
         )
         if queryset.exists():
-            raise ValidationError('Нельзя добавлять более одного отзыва!')
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer = ReviewSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         serializer.save(
             author=self.request.user,
             title_id=Title.objects.get(id=self.kwargs['title_id'])
         )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -146,6 +150,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [
         permissions.IsAuthenticatedOrReadOnly,
         AuthorOrModerPermission]
+
     def list(self, request, title_id, review_id):
         review = Review.objects.get(id=review_id)
         queryset = review.comments.all()
@@ -155,21 +160,23 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(
             author=self.request.user,
-            review_id=Review.objects.get(id=self.kwargs['review_id'])
+            review_id=Review.objects.get(id=int(self.kwargs['review_id']))
         )
 
 
 @api_view(['GET', 'PATCH'])
-@permission_classes([UserForSelfPermission,])
+@permission_classes([IsAuthenticated])
 def user_me(request):
     user = request.user
     if request.method == 'PATCH':
-        role = user.role
-        request.data['role'] = role
         serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        if not user.is_admin:
+            role = user.role
+            serializer.is_valid(raise_exception=True)
+            serializer.validated_data['role'] = role
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     serializer = UserSerializer(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -182,9 +189,11 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminOrStaffPermission,)
 
 
-@api_view(['GET', 'PATCH', 'DELETE'])
+@api_view(['GET', 'PATCH', 'DELETE', 'PUT'])
+@permission_classes([IsAuthenticated])
 def username_update(request, slug):
-    if request.user.role == 'admin':
+    req_user = request.user
+    if req_user.is_admin or req_user.is_superuser:
         user = get_object_or_404(User, username=slug)
         if request.method == 'DELETE':
             user.delete()

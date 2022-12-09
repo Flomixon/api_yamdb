@@ -1,4 +1,4 @@
-from api.models import Category, Genre, GenreTitle, Title
+from reviews.models import Category, Genre, GenreTitle, Title
 from django.contrib import admin
 
 admin.register(Title)

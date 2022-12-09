@@ -68,7 +68,7 @@ class GenreTitle(models.Model):
         Genre,
         on_delete=models.CASCADE,
     )
-    titlegit  = models.ForeignKey(
+    titlegit = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
     )
@@ -130,7 +130,6 @@ class CustomUser(AbstractUser):
         verbose_name='Код для авторизации'
     )
 
-
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -177,6 +176,14 @@ class Review(models.Model):
         ]
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title_id'],
+                name='unique_author_title'
+            )
+        ]
 
 
 class Comment(models.Model):

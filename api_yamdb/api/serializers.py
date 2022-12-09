@@ -3,7 +3,7 @@ import datetime
 from rest_framework import serializers
 from django.db.models import Avg
 
-from .models import Comment, Review, Title, User, Category, Genre
+from reviews.models import Comment, Review, Title, User, Category, Genre
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -32,7 +32,7 @@ class ReadTitleSerializer(serializers.ModelSerializer):
         if value.score.count() > 0:
             rating = value.score.aggregate(rt=Avg('score'))
             return rating['rt']
-        return '0'
+        return None
 
     class Meta:
         fields = (
