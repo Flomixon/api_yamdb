@@ -164,7 +164,7 @@ User = get_user_model()
 
 
 class Review(models.Model):
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='score')
     text = models.TextField()
     author = models.ForeignKey(
@@ -180,7 +180,7 @@ class Review(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title_id'],
+                fields=['author', 'title'],
                 name='unique_author_title'
             )
         ]

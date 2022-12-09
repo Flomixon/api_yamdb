@@ -131,7 +131,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def create(self, request, title_id):
         queryset = Review.objects.filter(
             author=self.request.user,
-            title_id=title_id
+            title=title_id
         )
         if queryset.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -139,7 +139,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(
             author=self.request.user,
-            title_id=Title.objects.get(id=self.kwargs['title_id'])
+            title=Title.objects.get(id=self.kwargs['title_id'])
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
