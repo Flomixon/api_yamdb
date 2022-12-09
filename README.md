@@ -30,14 +30,14 @@ Linux:
 Установить зависимости из файла requirements.txt.
 
 `pip install -r requirements.txt`
+
 Установить миграции.
-
-
 
 `    python manage.py migrate`
 В файле settings.py прописать используемый домен.
 
 ALLOWED_HOSTS = ['список используемых доменов']
+
 Запустить проект.
 
 `python3 manage.py runserver`
