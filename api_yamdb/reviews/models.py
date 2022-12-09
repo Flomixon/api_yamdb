@@ -39,7 +39,8 @@ class Title(models.Model):
     description = models.TextField(null=True)
     genre = models.ManyToManyField(
         Genre,
-        through='GenreTitle'
+        through='GenreTitle',
+        related_name='genres'
     )
     category = models.ForeignKey(
         Category,
@@ -54,12 +55,6 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произвдения'
         ordering = ('name',)
-        """ constraints = [
-            models.UniqueConstraint(
-                fields=['name', 'genre'],
-                name='unique_title'
-            )
-        ] """
 
 
 class GenreTitle(models.Model):
@@ -67,10 +62,12 @@ class GenreTitle(models.Model):
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
+        related_name='genre'
     )
     titlegit = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
+        related_name='title'
     )
 
     def __str__(self) -> str:
