@@ -47,3 +47,4 @@ http://127.0.0.1:8000/redoc/
 [Авраменко Роман](https://github.com/pa1nf0rce),
 [Ермолов Виталий](https://github.com/Flomixon),
 [Плотников Алексей](https://github.com/Aleksei93)
+

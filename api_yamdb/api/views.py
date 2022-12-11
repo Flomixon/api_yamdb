@@ -29,7 +29,7 @@ from api.utils import send_confirmation_code_to_email
 
 @api_view(['POST'])
 def signup_new_user(request):
-    """Регистрируем нового пользователя"""
+    """Регистрируем нового пользователя."""
     username = request.data.get('username')
     if not User.objects.filter(username=username).exists():
         serializer = AuthSignUpSerializer(data=request.data)
@@ -53,7 +53,7 @@ def signup_new_user(request):
 
 @api_view(['POST'])
 def get_token(request):
-    """Получаем JWT токен"""
+    """Получаем JWT токен."""
     serializer = AuthTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
@@ -112,7 +112,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def slug_gen_destroy(request, slug):
-    "Удаление жанров"
+    """Удаление жанров."""
     if request.user.role == 'admin':
         cat = get_object_or_404(Genre, slug=slug)
         cat.delete()
@@ -131,7 +131,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def slug_cat_destroy(request, slug):
-    "Удаление категорий"
+    """Удаление категорий."""
     if request.user.role == 'admin':
         cat = get_object_or_404(Category, slug=slug)
         cat.delete()
@@ -190,7 +190,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def user_me(request):
-    "Редактирование личного профиля"
+    """Редактирование личного профиля."""
     user = request.user
     if request.method == 'PATCH':
         serializer = UserSerializer(user, data=request.data, partial=True)
@@ -215,7 +215,7 @@ class UserViewSet(viewsets.ModelViewSet):
 @api_view(['GET', 'PATCH', 'DELETE', 'PUT'])
 @permission_classes([IsAuthenticated])
 def username_update(request, slug):
-    "Редактирование и создание пользователя администратором"
+    """Редактирование и создание пользователя администратором."""
     req_user = request.user
     if req_user.is_admin or req_user.is_superuser:
         user = get_object_or_404(User, username=slug)
