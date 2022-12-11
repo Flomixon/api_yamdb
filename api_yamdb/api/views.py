@@ -7,7 +7,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api.mixins import CustomViewSet
 from reviews.models import Category, Comment, Genre, Review, Title, User
 from api.permission import (
     AdminOrReadOnly,
@@ -35,13 +34,9 @@ def signup_new_user(request):
     if not User.objects.filter(username=username).exists():
         serializer = AuthSignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if serializer.validated_data['username'] != 'me':
-            serializer.save()
-            send_confirmation_code_to_email(username)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(
-            'Имя указан невено!', status=status.HTTP_400_BAD_REQUEST
-        )
+        serializer.save()
+        send_confirmation_code_to_email(username)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     user = get_object_or_404(User, username=username)
     serializer = AuthSignUpSerializer(
         user, data=request.data, partial=True
@@ -106,7 +101,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class GenreViewSet(CustomViewSet):
+class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
@@ -125,7 +120,7 @@ def slug_gen_destroy(request, slug):
     return Response(status=status.HTTP_403_FORBIDDEN)
 
 
-class CategoryViewSet(CustomViewSet):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)

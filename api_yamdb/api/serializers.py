@@ -73,6 +73,13 @@ class AuthSignUpSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'username')
 
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя указан невено!'
+            )
+        return value
+
 
 class AuthTokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
