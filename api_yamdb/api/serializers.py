@@ -75,8 +75,10 @@ class AuthSignUpSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if value == 'me':
-            raise serializers.ValidationError('Имя указано невено!')
-        return value 
+            raise serializers.ValidationError(
+                'Имя указан невено!'
+            )
+        return value
 
 
 class AuthTokenSerializer(serializers.Serializer):

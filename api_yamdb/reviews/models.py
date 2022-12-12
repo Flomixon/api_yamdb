@@ -6,6 +6,7 @@ from django.db import models
 
 class Category(models.Model):
     """Модель категорий."""
+
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True)
 
@@ -18,22 +19,17 @@ class Category(models.Model):
         ordering = ('name',)
 
 
-class Genre(models.Model):
+class Genre(Category):
     """Модель жанров."""
-    name = models.CharField(max_length=50)
-    slug = models.SlugField(unique=True)
-
-    def __str__(self) -> str:
-        return self.name
 
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-        ordering = ('name',)
 
 
 class Title(models.Model):
     """Модель произведений."""
+
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(null=True)
@@ -59,12 +55,13 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     """Модель произведний и жанров."""
+
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
         related_name='genre'
     )
-    titlegit = models.ForeignKey(
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='title'
@@ -76,7 +73,7 @@ class GenreTitle(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['genre', 'titlegit'],
+                fields=['genre', 'title'],
                 name='unique_genr_title'
             )
         ]
@@ -151,19 +148,25 @@ class CustomUser(AbstractUser):
 User = get_user_model()
 
 
-class Review(models.Model):
-    title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='score')
+class Abstract(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews')
+        User, on_delete=models.CASCADE, related_name='%(class)s')
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class Review(Abstract):
+    title = models.ForeignKey(
+        Title, on_delete=models.CASCADE, related_name='score')
     score = models.IntegerField(
         validators=[
             MaxValueValidator(10),
             MinValueValidator(1)
         ]
     )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     class Meta:
         constraints = [
@@ -174,10 +177,6 @@ class Review(models.Model):
         ]
 
 
-class Comment(models.Model):
+class Comment(Abstract):
     review_id = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments')
-    text = models.TextField()
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments')
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
