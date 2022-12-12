@@ -46,5 +46,4 @@ http://127.0.0.1:8000/redoc/
 ## :office_worker: Об авторах: 
 [Авраменко Роман](https://github.com/pa1nf0rce),
 [Ермолов Виталий](https://github.com/Flomixon),
-[Плотников Алексей](https://github.com/Aleksei93)
-
+[Плотников Алексей](https://github.com/Aleksei93
