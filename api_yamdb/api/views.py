@@ -34,8 +34,9 @@ def signup_new_user(request):
     username = request.data.get('username')
     if username == 'me':
         return Response(
-        'Не допустимый логин!', status=status.HTTP_400_BAD_REQUEST
-    )
+            'Не допустимый логин!',
+            status=status.HTTP_400_BAD_REQUEST
+        )
     email = request.data.get('email')
     serializer = AuthSignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -49,12 +50,15 @@ def signup_new_user(request):
     except IntegrityError as error:
         if error.args[0].endswith('email'):
             return Response(
-                'Указаный email уже используется', status=status.HTTP_400_BAD_REQUEST
+                'Указаный email уже используется',
+                status=status.HTTP_400_BAD_REQUEST
             )
         elif error.args[0].endswith('username'):
             return Response(
-                'Указаный логин уже используется', status=status.HTTP_400_BAD_REQUEST
+                'Указаный логин уже используется',
+                status=status.HTTP_400_BAD_REQUEST
             )
+
 
 @api_view(['POST'])
 def get_token(request):
