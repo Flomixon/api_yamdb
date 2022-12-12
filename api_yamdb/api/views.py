@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
 
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -31,25 +32,29 @@ from api.utils import send_confirmation_code_to_email
 def signup_new_user(request):
     """Регистрируем нового пользователя."""
     username = request.data.get('username')
-    if not User.objects.filter(username=username).exists():
-        serializer = AuthSignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        send_confirmation_code_to_email(username)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    user = get_object_or_404(User, username=username)
-    serializer = AuthSignUpSerializer(
-        user, data=request.data, partial=True
+    if username == 'me':
+        return Response(
+        'Не допустимый логин!', status=status.HTTP_400_BAD_REQUEST
     )
+    email = request.data.get('email')
+    serializer = AuthSignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    if serializer.validated_data['email'] == user.email:
-        serializer.save()
+    try:
+        user, ex = User.objects.get_or_create(
+            username=username,
+            email=email
+        )
         send_confirmation_code_to_email(username)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(
-        'Почта указана неверно!', status=status.HTTP_400_BAD_REQUEST
-    )
-
+    except IntegrityError as error:
+        if error.args[0].endswith('email'):
+            return Response(
+                'Указаный email уже используется', status=status.HTTP_400_BAD_REQUEST
+            )
+        elif error.args[0].endswith('username'):
+            return Response(
+                'Указаный логин уже используется', status=status.HTTP_400_BAD_REQUEST
+            )
 
 @api_view(['POST'])
 def get_token(request):
