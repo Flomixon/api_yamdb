@@ -35,13 +35,9 @@ def signup_new_user(request):
     if not User.objects.filter(username=username).exists():
         serializer = AuthSignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if serializer.validated_data['username'] != 'me':
-            serializer.save()
-            send_confirmation_code_to_email(username)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(
-            'Имя указан невено!', status=status.HTTP_400_BAD_REQUEST
-        )
+        serializer.save()
+        send_confirmation_code_to_email(username)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     user = get_object_or_404(User, username=username)
     serializer = AuthSignUpSerializer(
         user, data=request.data, partial=True
