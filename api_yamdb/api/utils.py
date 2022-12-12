@@ -9,9 +9,7 @@ from reviews.models import User
 
 
 def send_confirmation_code_to_email(username):
-    """
-    Генерирует, отправляет по электронной почте
-    и сохраняет в базу код подтверждения """
+    """Генерирует, отправляет на почту и сохраняет в базу код подтверждения."""
     user = get_object_or_404(User, username=username)
     confirmation_code = str(uuid.uuid3(uuid.NAMESPACE_DNS, username))
     user.confirmation_code = confirmation_code

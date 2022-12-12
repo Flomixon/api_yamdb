@@ -29,12 +29,16 @@ router_v1.register(
 )
 router_v1.register('users', UserViewSet)
 
+users_path = [
+    path('me/', user_me),
+    path('<slug:slug>/', username_update)
+]
+
 urlpatterns = [
     path('v1/auth/signup/', signup_new_user, name='auth_signup'),
     path('v1/auth/token/', get_token, name='auth_token'),
     path('v1/categories/<slug:slug>/', slug_cat_destroy),
     path('v1/genres/<slug:slug>/', slug_gen_destroy),
-    path('v1/users/me/', user_me),
-    path('v1/users/<slug:slug>/', username_update),
+    path('v1/users/', include(users_path)),
     path('v1/', include(router_v1.urls))
 ]

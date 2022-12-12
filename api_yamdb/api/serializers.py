@@ -67,11 +67,17 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
 
-class AuthSignUpSerializer(serializers.ModelSerializer):
+class AuthSignUpSerializer(serializers.Serializer):
 
-    class Meta:
-        model = User
-        fields = ('email', 'username')
+    email = serializers.EmailField(max_length=254)
+    username = serializers.CharField(max_length=150)
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя указан невено!'
+            )
+        return value
 
 
 class AuthTokenSerializer(serializers.Serializer):
