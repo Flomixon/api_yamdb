@@ -80,7 +80,7 @@ class GenreTitle(models.Model):
             models.UniqueConstraint(
                 fields=('genre', 'title'),
                 name='unique_genr_title'
-            )
+            ),
         )
         verbose_name = 'Жанр и произведение'
         verbose_name_plural = 'Жанры и произведения'
@@ -134,7 +134,7 @@ class CustomUser(AbstractUser):
             models.UniqueConstraint(
                 fields=('username', 'email'),
                 name='unique_username_email'
-            )
+            ),
         )
 
     @property
@@ -178,7 +178,7 @@ class Review(BaseComment):
             models.UniqueConstraint(
                 fields=('author', 'title'),
                 name='unique_author_title'
-            )
+            ),
         )
 
 
