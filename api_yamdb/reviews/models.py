@@ -4,22 +4,27 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
-class Category(models.Model):
-    """Модель категорий."""
+class BaseTypeCategory(models.Model):
 
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ('name',)
+
+
+class Category(BaseTypeCategory):
+    """Модель категорий."""
 
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ('name',)
 
 
-class Genre(Category):
+class Genre(BaseTypeCategory):
     """Модель жанров."""
 
     class Meta:
@@ -71,12 +76,12 @@ class GenreTitle(models.Model):
         return f'Жанр {self.title}: {self.genre}'
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
-                fields=['genre', 'title'],
+                fields=('genre', 'title'),
                 name='unique_genr_title'
             )
-        ]
+        )
         verbose_name = 'Жанр и произведение'
         verbose_name_plural = 'Жанры и произведения'
 
@@ -125,12 +130,12 @@ class CustomUser(AbstractUser):
     )
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
-                fields=['username', 'email'],
+                fields=('username', 'email'),
                 name='unique_username_email'
             )
-        ]
+        )
 
     @property
     def is_user(self):
@@ -148,7 +153,7 @@ class CustomUser(AbstractUser):
 User = get_user_model()
 
 
-class Abstract(models.Model):
+class BaseComment(models.Model):
     text = models.TextField()
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='%(class)s')
@@ -158,25 +163,25 @@ class Abstract(models.Model):
         abstract = True
 
 
-class Review(Abstract):
+class Review(BaseComment):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='score')
     score = models.IntegerField(
-        validators=[
+        validators=(
             MaxValueValidator(10),
             MinValueValidator(1)
-        ]
+        )
     )
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
-                fields=['author', 'title'],
+                fields=('author', 'title'),
                 name='unique_author_title'
             )
-        ]
+        )
 
 
-class Comment(Abstract):
+class Comment(BaseComment):
     review_id = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments')

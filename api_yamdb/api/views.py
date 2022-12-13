@@ -53,12 +53,7 @@ def get_token(request):
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
     confirmation_code = serializer.validated_data['confirmation_code']
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return Response(
-            'Пользователь отсутсвует', status=status.HTTP_404_NOT_FOUND
-        )
+    user = get_object_or_404(User, username=username)
     if user.confirmation_code == confirmation_code:
         refresh = RefreshToken.for_user(user)
         token_data = {'token': str(refresh.access_token)}
