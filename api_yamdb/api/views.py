@@ -32,32 +32,18 @@ from api.utils import send_confirmation_code_to_email
 def signup_new_user(request):
     """Регистрируем нового пользователя."""
     username = request.data.get('username')
-    if username == 'me':
-        return Response(
-            'Не допустимый логин!',
-            status=status.HTTP_400_BAD_REQUEST
-        )
     email = request.data.get('email')
     serializer = AuthSignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     try:
-        user, ex = User.objects.get_or_create(
+        User.objects.get_or_create(
             username=username,
             email=email
         )
         send_confirmation_code_to_email(username)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    except IntegrityError as error:
-        if error.args[0].endswith('email'):
-            return Response(
-                'Указаный email уже используется',
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        elif error.args[0].endswith('username'):
-            return Response(
-                'Указаный логин уже используется',
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    except IntegrityError:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])

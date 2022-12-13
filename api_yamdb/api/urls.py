@@ -35,8 +35,8 @@ users_path = [
 ]
 
 urlpatterns = [
-    path('v1/auth/signup/', signup_new_user, name='auth_signup'),
     path('v1/auth/token/', get_token, name='auth_token'),
+    path('v1/auth/signup/', signup_new_user, name='auth_signup'),
     path('v1/categories/<slug:slug>/', slug_cat_destroy),
     path('v1/genres/<slug:slug>/', slug_gen_destroy),
     path('v1/users/', include(users_path)),
